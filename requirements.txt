@@ -1,3 +1,2 @@
 pymisp
 requests
-vfeed
