@@ -1,4 +1,4 @@
-[Chicago CyberSecurity](https://www.meetup.com/chicagosecurity) is an organization dedicated to promoting the education of security in the Chicago community.
+[Chicago CyberSecurity](https://www.chicagocybersecurity.org) is an organization dedicated to promoting the education of security in the Chicago community. Check out our [Meetups](https://www.meetup.com/chicagosecurity)
 
 ![Chicago CyberSecurity](https://secure.meetupstatic.com/photos/event/6/9/b/highres_479341691.jpeg)
 
