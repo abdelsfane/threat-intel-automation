@@ -4,7 +4,7 @@
 
 ================================================================================
 
-*This a sample demo to demonstrate how we can automate the collection of threat intelligence and lauch an automated attack based on the collected intel.*
+**This a sample demo to demonstrate how we can automate the collection of threat intelligence and lauch an automated attack based on the collected intel.**
 ================================================================================
 
 * Prerequisites for making this demo work:
@@ -27,5 +27,5 @@
 
 ================================================================================
 
-* How to Run
+* How to Run *
 python3 mydemo.py
