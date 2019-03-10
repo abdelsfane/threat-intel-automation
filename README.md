@@ -1,6 +1,6 @@
 [Chicago CyberSecurity](https://www.meetup.com/chicagosecurity) is an organization dedicated to promoting the education of security in the Chicago community.
 
-![Chicago CyberSecurity](https://img1.wsimg.com/isteam/ip/3eb9c502-58c2-4efc-a007-6e37f653acd0/29e675f7-8a51-463c-8b06-8d914c9d6b52.png)
+![Chicago CyberSecurity](https://secure.meetupstatic.com/photos/event/6/9/b/highres_479341691.jpeg)
 
 ======================================================================================
 This a sample demo to demonstrate how we can automate the collection of threat intelligence and lauch an automated attack based on the collected intel.
